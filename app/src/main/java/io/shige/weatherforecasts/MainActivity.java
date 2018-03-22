@@ -6,10 +6,34 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.os.Handler;
 import java.io.IOException;
+import java.nio.file.WatchEvent;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+{
 
-    private Handler handler = new Handler();
+    public class ApiTask extends GetWeatherForecastTask
+    {
+        @Override
+        protected void onPostExecute(WeatherForecast data)
+        {
+            super.onPostExecute(data);
+
+            if( data != null )
+            {
+                result.setText(data.location.area + " " + data.location.prefecture + " " + data.location.city);
+                for(WeatherForecast.Forecast forecast : data.forcastList)
+                {
+                    result.append("/");
+                    result.append(forecast.dateLabel + " " + forecast.telop);
+                }
+            }
+            else if( exception != null )
+            {
+                Toast.makeText(getApplicationContext(), exception.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
     private TextView result;
 
     @Override
@@ -19,30 +43,6 @@ public class MainActivity extends AppCompatActivity {
 
         result = (TextView) findViewById(R.id.tv_result);
 
-        Thread subThread = new Thread()
-        {
-            @Override
-            public void run()
-            {
-                try
-                {
-                    final String data = WeatherAPI.getWeather("400040");
-                    handler.post(new Runnable()
-                    {
-                        @Override
-                        public void run()
-                        {
-                            result.setText(data);
-                        }
-
-                    });
-                }
-                catch(IOException e)
-                {
-                    Toast.makeText(getApplicationContext(), "IOException is occured.", Toast.LENGTH_SHORT).show();
-                }
-            }
-        };
-        subThread.start();
+        new ApiTask().execute("40040");
     }
 }

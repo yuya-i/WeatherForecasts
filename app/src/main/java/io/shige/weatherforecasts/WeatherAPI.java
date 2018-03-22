@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Created by yuya on 2018/03/02.
@@ -13,8 +15,9 @@ import java.net.URL;
 public class WeatherAPI
 {
     private static final String API_ENDPOINT
-            = "http://weather.livedoor.com/forecast/webservice/json/vl?city=";
-    public static String getWeather(String cityId) throws IOException
+            = "http://weather.livedoor.com/forecast/webservice/json/v1?city=";
+
+    public static WeatherForecast getWeather(String cityId) throws IOException, JSONException
     {
         URL uri = new URL(API_ENDPOINT + cityId);
         HttpURLConnection connection = (HttpURLConnection) uri.openConnection();
@@ -35,6 +38,6 @@ public class WeatherAPI
         {
             connection.disconnect();
         }
-        return sb.toString();
+        return new WeatherForecast(new JSONObject(sb.toString()));
     }
 }
